@@ -30,3 +30,26 @@ fun SignatureBlock(name: String, onEdit: (String) -> Unit, title: String, modifi
         Text("Date: ................", fontSize = 5.sp, color = Color(0xFF888888))
     }
 }
+
+@Composable
+fun DateFilterBar(onToday: () -> Unit, onAll: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        androidx.compose.material3.Button(
+            onClick = onToday,
+            modifier = Modifier.height(32.dp),
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF0A84FF))
+        ) {
+            Text("Today", fontSize = 9.sp)
+        }
+        androidx.compose.material3.Button(
+            onClick = onAll,
+            modifier = Modifier.height(32.dp),
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E))
+        ) {
+            Text("All", fontSize = 9.sp)
+        }
+    }
+}

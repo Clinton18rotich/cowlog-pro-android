@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.cowlog.pro.data.*
 import com.cowlog.pro.ui.BottomNavBar
 import com.cowlog.pro.ui.TopBar
+import com.cowlog.pro.ui.components.DateFilterBar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -170,28 +171,40 @@ val SI_CATEGORIES = linkedMapOf(
 
 @Composable
 fun SIScreen(appData: AppData, settings: ProjectSettings, navController: NavController, onUpdate: (AppData) -> Unit) {
+    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    var filterDate by remember { mutableStateOf("") }
+    val displaySIs = if (filterDate.length >= 10) appData.instructions.filter { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it.timestamp)) == filterDate.take(10) } else appData.instructions
+
     var showForm by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("") }
     var selectedInstruction by remember { mutableStateOf("") }
-    
+
     Scaffold(
-        topBar = { TopBar("📋 Site Instructions", navController) },
+        topBar = { TopBar("📝 Site Instructions", navController) },
         bottomBar = { BottomNavBar(navController, "si") },
-        floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedInstruction = "" }, containerColor = Color(0xFFFF9F0A)) { Text("+", fontSize = 24.sp, color = Color.Black) } }
+        floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedInstruction = "" }, containerColor = Color(0xFFFF9500)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {
-            if (appData.instructions.isEmpty()) {
+            DateFilterBar(onToday = { filterDate = today }, onAll = { filterDate = "" })
+            if (filterDate.isNotEmpty()) Text("${displaySIs.size} SIs on ${filterDate.take(10)}", fontSize = 10.sp, color = Color(0xFF0A84FF), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+
+            if (displaySIs.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("📋", fontSize = 48.sp); Text("No Site Instructions", color = Color.Gray) }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("📝", fontSize = 48.sp); Text("No Site Instructions", color = Color.Gray) }
                 }
             } else {
                 LazyColumn {
-                    items(appData.instructions.sortedByDescending { it.timestamp }) { si ->
+                    items(displaySIs.sortedByDescending { it.timestamp }) { si ->
                         Card(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).clickable { navController.navigate("siDoc/${si.id}") }, colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text("SI-${si.id.take(6)}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                Text("To: ${si.issuedTo}", fontSize = 11.sp, color = Color.Gray)
-                                Text(si.description.take(100), fontSize = 12.sp)
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("SI-${si.id.take(6)}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Surface(color = if (si.status == "open") Color(0x44FF9500) else Color(0x4430D158), shape = MaterialTheme.shapes.small) {
+                                        Text(si.status.uppercase(), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, color = if (si.status == "open") Color(0xFFFF9500) else Color(0xFF30D158))
+                                    }
+                                }
+                                Text(si.description.take(80), fontSize = 11.sp, color = Color.White)
+                                Text("To: ${si.issuedTo} · ${SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(si.timestamp))}", fontSize = 10.sp, color = Color.Gray)
                                 Text("📄 Tap to view document →", fontSize = 9.sp, color = Color(0xFF0A84FF))
                             }
                         }
@@ -200,55 +213,46 @@ fun SIScreen(appData: AppData, settings: ProjectSettings, navController: NavCont
             }
         }
     }
-    
-    // SI Form
+
     if (showForm) {
-        var description by remember { mutableStateOf("") }
+        var desc by remember { mutableStateOf("") }
         var issuedTo by remember { mutableStateOf(settings.contractorName) }
-        var location by remember { mutableStateOf(settings.defaultLocation) }
-        var deadline by remember { mutableStateOf("") }
-        var reference by remember { mutableStateOf("") }
-        
+        var loc by remember { mutableStateOf(settings.defaultLocation) }
+
         AlertDialog(
             onDismissRequest = { showForm = false },
-            title = { Text(if (selectedInstruction.isEmpty()) "Issue Site Instruction" else selectedCategory, fontSize = 13.sp) },
+            title = { Text(if (selectedInstruction.isEmpty()) "Issue SI" else selectedInstruction, fontSize = 13.sp) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth().heightIn(max = 450.dp).verticalScroll(rememberScrollState())) {
-                    
                     if (selectedInstruction.isEmpty()) {
-                        Text("1. Select Category:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9F0A))
                         SI_CATEGORIES.keys.forEach { cat ->
                             TextButton(onClick = { selectedCategory = cat }, modifier = Modifier.fillMaxWidth()) {
-                                Text(cat, fontSize = 10.sp, color = if (selectedCategory == cat) Color(0xFFFF9F0A) else Color.Gray)
+                                Text(cat, fontSize = 10.sp, color = if (selectedCategory == cat) Color(0xFFFF9500) else Color.Gray)
                             }
                         }
                         if (selectedCategory.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("2. Select Instruction:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9F0A))
-                            SI_CATEGORIES[selectedCategory]?.forEach { instr ->
-                                TextButton(onClick = { selectedInstruction = instr; description = instr }, modifier = Modifier.fillMaxWidth()) {
-                                    Text(instr, fontSize = 9.sp, color = Color.White)
+                            SI_CATEGORIES[selectedCategory]?.forEach { inst ->
+                                TextButton(onClick = { selectedInstruction = inst; desc = inst }, modifier = Modifier.fillMaxWidth()) {
+                                    Text(inst, fontSize = 10.sp, color = Color.White)
                                 }
                             }
                         }
                     }
-                    
-                    OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Instruction *") }, modifier = Modifier.fillMaxWidth(), maxLines = 4)
+                    OutlinedTextField(value = desc, onValueChange = { desc = it }, label = { Text("Description *") }, modifier = Modifier.fillMaxWidth(), maxLines = 3)
                     OutlinedTextField(value = issuedTo, onValueChange = { issuedTo = it }, label = { Text("Issued To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = location, onValueChange = { location = it }, label = { Text("Location") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = reference, onValueChange = { reference = it }, label = { Text("Reference (Drg/Spec)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = deadline, onValueChange = { deadline = it }, label = { Text("Compliance Deadline") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(value = loc, onValueChange = { loc = it }, label = { Text("Location") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 }
             },
             confirmButton = {
                 Button(onClick = {
-                    if (description.isNotBlank()) {
+                    if (desc.isNotBlank()) {
                         val newData = appData.copy()
-                        newData.instructions.add(SiteInstruction(id = UUID.randomUUID().toString(), issuedTo = issuedTo, location = location, description = description, reference = reference, deadline = deadline, status = "issued", timestamp = System.currentTimeMillis()))
+                        newData.instructions.add(SiteInstruction(id = UUID.randomUUID().toString(), description = desc, issuedTo = issuedTo, location = loc, status = "open", timestamp = System.currentTimeMillis()))
                         onUpdate(newData)
                         showForm = false; selectedCategory = ""; selectedInstruction = ""
                     }
-                }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9F0A))) { Text("Issue SI", color = Color.Black) }
+                }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9500))) { Text("Issue SI", color = Color.White) }
             },
             dismissButton = { Button(onClick = { showForm = false; selectedCategory = ""; selectedInstruction = "" }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E))) { Text("Cancel") } }
         )

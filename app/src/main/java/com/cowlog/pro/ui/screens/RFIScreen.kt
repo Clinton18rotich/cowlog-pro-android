@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.cowlog.pro.data.*
 import com.cowlog.pro.ui.BottomNavBar
 import com.cowlog.pro.ui.TopBar
+import com.cowlog.pro.ui.components.DateFilterBar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -114,34 +115,40 @@ val RFI_CATEGORIES = linkedMapOf(
 
 @Composable
 fun RFIScreen(appData: AppData, settings: ProjectSettings, navController: NavController, onUpdate: (AppData) -> Unit) {
+    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    var filterDate by remember { mutableStateOf("") }
+    val displayRFIs = if (filterDate.length >= 10) appData.rfis.filter { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it.timestamp)) == filterDate.take(10) } else appData.rfis
+
     var showForm by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("") }
     var selectedQuestion by remember { mutableStateOf("") }
-    
+
     Scaffold(
-        topBar = { TopBar("📤 RFIs", navController) },
+        topBar = { TopBar("❓ RFIs", navController) },
         bottomBar = { BottomNavBar(navController, "rfi") },
-        floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedQuestion = "" }, containerColor = Color(0xFFBF5AF2)) { Text("+", fontSize = 24.sp, color = Color.White) } }
+        floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedQuestion = "" }, containerColor = Color(0xFF0A84FF)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {
-            if (appData.rfis.isEmpty()) {
+            DateFilterBar(onToday = { filterDate = today }, onAll = { filterDate = "" })
+            if (filterDate.isNotEmpty()) Text("${displayRFIs.size} RFIs on ${filterDate.take(10)}", fontSize = 10.sp, color = Color(0xFF0A84FF), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+
+            if (displayRFIs.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("📤", fontSize = 48.sp); Text("No RFIs", color = Color.Gray); TextButton(onClick = { showForm = true }) { Text("+ New RFI") } }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("❓", fontSize = 48.sp); Text("No RFIs raised", color = Color.Gray) }
                 }
             } else {
                 LazyColumn {
-                    items(appData.rfis.sortedByDescending { it.timestamp }) { rfi ->
+                    items(displayRFIs.sortedByDescending { it.timestamp }) { rfi ->
                         Card(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).clickable { navController.navigate("rfiDoc/${rfi.id}") }, colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(rfi.subject, fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                    Surface(color = if (rfi.status == "open") Color(0x44FF9F0A) else Color(0x4430D158), shape = MaterialTheme.shapes.small) {
-                                        Text(rfi.status.uppercase(), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, color = if (rfi.status == "open") Color(0xFFFF9F0A) else Color(0xFF30D158))
+                                    Text("RFI-${rfi.id.take(6)}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Surface(color = if (rfi.status == "open") Color(0x440A84FF) else Color(0x4430D158), shape = MaterialTheme.shapes.small) {
+                                        Text(rfi.status.uppercase(), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, color = if (rfi.status == "open") Color(0xFF0A84FF) else Color(0xFF30D158))
                                     }
                                 }
-                                Text("To: ${rfi.sentTo} | ${SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(rfi.timestamp))}", fontSize = 10.sp, color = Color.Gray)
-                                Text(rfi.question.take(100), fontSize = 11.sp, color = Color.White)
-                                if (rfi.response.isNotEmpty()) { Text("📩 ${rfi.response.take(80)}", fontSize = 10.sp, color = Color(0xFF30D158)) }
+                                Text(rfi.question.take(80), fontSize = 11.sp, color = Color.White)
+                                Text("To: ${rfi.sentTo} · ${SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(rfi.timestamp))}", fontSize = 10.sp, color = Color.Gray)
                                 Text("📄 Tap to view document →", fontSize = 9.sp, color = Color(0xFF0A84FF))
                             }
                         }
@@ -150,51 +157,44 @@ fun RFIScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
             }
         }
     }
-    
-    // RFI Form
+
     if (showForm) {
-        var subject by remember { mutableStateOf("") }
         var question by remember { mutableStateOf("") }
-        var sentTo by remember { mutableStateOf("Engineer") }
-        
+        var issuedTo by remember { mutableStateOf(settings.contractorName) }
+
         AlertDialog(
             onDismissRequest = { showForm = false },
-            title = { Text(if (selectedQuestion.isEmpty()) "New RFI" else selectedCategory, fontSize = 13.sp) },
+            title = { Text(if (selectedQuestion.isEmpty()) "Raise RFI" else "RFI", fontSize = 13.sp) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth().heightIn(max = 450.dp).verticalScroll(rememberScrollState())) {
-                    
                     if (selectedQuestion.isEmpty()) {
-                        Text("1. Select Category:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFBF5AF2))
                         RFI_CATEGORIES.keys.forEach { cat ->
                             TextButton(onClick = { selectedCategory = cat }, modifier = Modifier.fillMaxWidth()) {
-                                Text(cat, fontSize = 10.sp, color = if (selectedCategory == cat) Color(0xFFBF5AF2) else Color.Gray)
+                                Text(cat, fontSize = 10.sp, color = if (selectedCategory == cat) Color(0xFF0A84FF) else Color.Gray)
                             }
                         }
                         if (selectedCategory.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("2. Select Question:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFBF5AF2))
                             RFI_CATEGORIES[selectedCategory]?.forEach { q ->
-                                TextButton(onClick = { selectedQuestion = q; subject = q.take(60); question = q }, modifier = Modifier.fillMaxWidth()) {
-                                    Text(q, fontSize = 9.sp, color = Color.White)
+                                TextButton(onClick = { selectedQuestion = q; question = q }, modifier = Modifier.fillMaxWidth()) {
+                                    Text(q, fontSize = 10.sp, color = Color.White)
                                 }
                             }
                         }
                     }
-                    
-                    OutlinedTextField(value = subject, onValueChange = { subject = it }, label = { Text("Subject *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = sentTo, onValueChange = { sentTo = it }, label = { Text("Sent To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = question, onValueChange = { question = it }, label = { Text("Question *") }, modifier = Modifier.fillMaxWidth(), maxLines = 5)
+                    OutlinedTextField(value = question, onValueChange = { question = it }, label = { Text("Question *") }, modifier = Modifier.fillMaxWidth(), maxLines = 4)
+                    OutlinedTextField(value = issuedTo, onValueChange = { issuedTo = it }, label = { Text("Issued To") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 }
             },
             confirmButton = {
                 Button(onClick = {
-                    if (subject.isNotBlank() && question.isNotBlank()) {
+                    if (question.isNotBlank()) {
                         val newData = appData.copy()
-                        newData.rfis.add(RFI(id = UUID.randomUUID().toString(), subject = subject, sentTo = sentTo, question = question, status = "open", timestamp = System.currentTimeMillis()))
+                        newData.rfis.add(RFI(id = UUID.randomUUID().toString(), question = question, sentTo = issuedTo, status = "open", timestamp = System.currentTimeMillis()))
                         onUpdate(newData)
                         showForm = false; selectedCategory = ""; selectedQuestion = ""
                     }
-                }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBF5AF2))) { Text("Submit RFI", color = Color.White) }
+                }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0A84FF))) { Text("Raise RFI", color = Color.White) }
             },
             dismissButton = { Button(onClick = { showForm = false; selectedCategory = ""; selectedQuestion = "" }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E))) { Text("Cancel") } }
         )

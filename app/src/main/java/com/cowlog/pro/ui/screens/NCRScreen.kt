@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.cowlog.pro.data.*
 import com.cowlog.pro.ui.BottomNavBar
 import com.cowlog.pro.ui.TopBar
+import com.cowlog.pro.ui.components.DateFilterBar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,23 +44,30 @@ val NCR_CATEGORIES = linkedMapOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCRScreen(appData: AppData, settings: ProjectSettings, navController: NavController, onUpdate: (AppData) -> Unit) {
+    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    var filterDate by remember { mutableStateOf("") }
+    val displayNCRs = if (filterDate.length >= 10) appData.ncrs.filter { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it.timestamp)) == filterDate.take(10) } else appData.ncrs
+    
     var showForm by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("") }
     var selectedNCR by remember { mutableStateOf("") }
-    
+
     Scaffold(
         topBar = { TopBar("🚨 NCRs", navController) },
         bottomBar = { BottomNavBar(navController, "ncr") },
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedNCR = "" }, containerColor = Color(0xFFFF453A)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {
-            if (appData.ncrs.isEmpty()) {
+            DateFilterBar(onToday = { filterDate = today }, onAll = { filterDate = "" })
+            if (filterDate.isNotEmpty()) Text("${displayNCRs.size} NCRs on ${filterDate.take(10)}", fontSize = 10.sp, color = Color(0xFF0A84FF), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+            
+            if (displayNCRs.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("🚨", fontSize = 48.sp); Text("No NCRs raised", color = Color.Gray) }
                 }
             } else {
                 LazyColumn {
-                    items(appData.ncrs.sortedByDescending { it.timestamp }) { ncr ->
+                    items(displayNCRs.sortedByDescending { it.timestamp }) { ncr ->
                         Card(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).clickable { navController.navigate("ncrDoc/${ncr.id}") }, colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -78,7 +86,7 @@ fun NCRScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
             }
         }
     }
-    
+
     // NCR Form
     if (showForm) {
         var title by remember { mutableStateOf("") }
@@ -87,14 +95,12 @@ fun NCRScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
         var desc by remember { mutableStateOf("") }
         var action by remember { mutableStateOf("") }
         var responsible by remember { mutableStateOf(settings.contractorName) }
-        
+
         AlertDialog(
             onDismissRequest = { showForm = false },
             title = { Text(if (selectedNCR.isEmpty()) "Raise NCR" else selectedNCR, fontSize = 13.sp) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth().heightIn(max = 450.dp).verticalScroll(rememberScrollState())) {
-                    
-                    // Category & NCR type selection
                     if (selectedNCR.isEmpty()) {
                         Text("1. Select Category:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF453A))
                         NCR_CATEGORIES.keys.forEach { cat ->
@@ -112,16 +118,12 @@ fun NCRScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
                             }
                         }
                     }
-                    
-                    // Form fields
                     OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                         listOf("Minor", "Major", "Critical").forEach { s ->
                             FilterChip(selected = severity == s, onClick = { severity = s }, label = { Text(s, fontSize = 10.sp, color = if (severity == s) Color.White else Color.Gray) })
                         }
                     }
-                    
                     OutlinedTextField(value = location, onValueChange = { location = it }, label = { Text("Location") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                     OutlinedTextField(value = responsible, onValueChange = { responsible = it }, label = { Text("Responsible Party") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                     OutlinedTextField(value = desc, onValueChange = { desc = it }, label = { Text("Description *") }, modifier = Modifier.fillMaxWidth(), maxLines = 4)

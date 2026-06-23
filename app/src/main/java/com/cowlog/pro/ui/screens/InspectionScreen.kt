@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import com.cowlog.pro.data.*
 import com.cowlog.pro.ui.BottomNavBar
 import com.cowlog.pro.ui.TopBar
+import com.cowlog.pro.ui.components.DateFilterBar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -156,23 +157,30 @@ val INSPECTION_PHASES = linkedMapOf(
 
 @Composable
 fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController: NavController, onUpdate: (AppData) -> Unit) {
+    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    var filterDate by remember { mutableStateOf("") }
+    val displayInspections = if (filterDate.length >= 10) appData.inspections.filter { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it.timestamp)) == filterDate.take(10) } else appData.inspections
+    
     var showMenu by remember { mutableStateOf(false) }
     var selectedPhase by remember { mutableStateOf("") }
     var selectedChecklist by remember { mutableStateOf("") }
-    
+
     Scaffold(
         topBar = { TopBar("✅ Inspections", navController) },
         bottomBar = { BottomNavBar(navController, "inspections") },
         floatingActionButton = { FloatingActionButton(onClick = { showMenu = true; selectedPhase = ""; selectedChecklist = "" }, containerColor = Color(0xFF30D158)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {
-            if (appData.inspections.isEmpty()) {
+            DateFilterBar(onToday = { filterDate = today }, onAll = { filterDate = "" })
+            if (filterDate.isNotEmpty()) Text("${displayInspections.size} inspections on ${filterDate.take(10)}", fontSize = 10.sp, color = Color(0xFF0A84FF), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
+            
+            if (displayInspections.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("✅", fontSize = 48.sp); Text("No inspections yet", color = Color.Gray); Text("Tap + to start", fontSize = 12.sp, color = Color.DarkGray) }
                 }
             } else {
                 LazyColumn {
-                    items(appData.inspections.sortedByDescending { it.timestamp }) { insp ->
+                    items(displayInspections.sortedByDescending { it.timestamp }) { insp ->
                         Card(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -190,18 +198,19 @@ fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController:
             }
         }
     }
-    
+
     // Inspection selection dialog
     if (showMenu) {
         var checks by remember { mutableStateOf(listOf<Boolean>()) }
-        
+        var notes by remember { mutableStateOf("") }
+        var loc by remember { mutableStateOf(settings.defaultLocation) }
+
         AlertDialog(
             onDismissRequest = { showMenu = false },
             title = { Text(if (selectedChecklist.isEmpty()) "Select Inspection" else selectedChecklist, fontSize = 13.sp) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth().heightIn(max = 450.dp).verticalScroll(rememberScrollState())) {
                     if (selectedChecklist.isEmpty()) {
-                        // Phase selection
                         INSPECTION_PHASES.keys.forEach { phase ->
                             TextButton(onClick = { selectedPhase = phase }, modifier = Modifier.fillMaxWidth()) {
                                 Text(phase, fontSize = 10.sp, color = if (selectedPhase == phase) Color(0xFF30D158) else Color.Gray)
@@ -221,7 +230,6 @@ fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController:
                             }
                         }
                     } else {
-                        // Checklist items
                         val items = INSPECTION_PHASES[selectedPhase]?.get(selectedChecklist) ?: emptyList()
                         items.forEachIndexed { i, item ->
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -230,22 +238,34 @@ fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController:
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = {
-                            val items = INSPECTION_PHASES[selectedPhase]?.get(selectedChecklist) ?: emptyList()
-                            val inspItems = items.mapIndexed { i, item -> ChecklistItem(label = item, passed = checks.getOrElse(i) { true }) }
-                            val passed = inspItems.count { it.passed }
-                            val newData = appData.copy()
-                            newData.inspections.add(Inspection(id = UUID.randomUUID().toString(), checklistType = selectedChecklist, location = settings.defaultLocation, items = inspItems, result = if (passed == items.size) "pass" else "fail", timestamp = System.currentTimeMillis()))
-                            onUpdate(newData)
-                            showMenu = false
-                            selectedPhase = ""; selectedChecklist = ""
-                        }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF30D158))) {
-                            Text("Save Inspection", color = Color.White)
-                        }
+                        OutlinedTextField(value = loc, onValueChange = { loc = it }, label = { Text("Location") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        OutlinedTextField(value = notes, onValueChange = { notes = it }, label = { Text("Notes") }, modifier = Modifier.fillMaxWidth(), maxLines = 2)
                     }
                 }
             },
-            confirmButton = {},
+            confirmButton = {
+                if (selectedChecklist.isNotEmpty()) {
+                    Button(onClick = {
+                        val items = INSPECTION_PHASES[selectedPhase]?.get(selectedChecklist) ?: emptyList()
+                        val inspectionItems = items.mapIndexed { i, item -> com.cowlog.pro.data.ChecklistItem(label = item, passed = checks.getOrElse(i) { true }) }
+                        val passed = inspectionItems.count { it.passed }
+                        val result = if (passed == inspectionItems.size) "pass" else "fail"
+                        val newData = appData.copy()
+                        newData.inspections.add(Inspection(
+                            id = UUID.randomUUID().toString(),
+                            location = loc,
+                            items = inspectionItems,
+                            result = result,
+                            notes = notes,
+                            timestamp = System.currentTimeMillis()
+                        ))
+                        onUpdate(newData)
+                        showMenu = false; selectedPhase = ""; selectedChecklist = ""
+                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF30D158))) {
+                        Text("Submit Inspection", color = Color.White)
+                    }
+                }
+            },
             dismissButton = { TextButton(onClick = { showMenu = false; selectedPhase = ""; selectedChecklist = "" }) { Text("Cancel") } }
         )
     }

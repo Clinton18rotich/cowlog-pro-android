@@ -161,7 +161,8 @@ data class AppData(
     val delayNotices: MutableList<DelayNotice> = mutableListOf(),
     val materialRejections: MutableList<MaterialRejection> = mutableListOf(),
     val plantEquipment: MutableList<PlantEquipment> = mutableListOf(),
-    val plantDailyLogs: MutableList<PlantDailyLog> = mutableListOf()
+    val plantDailyLogs: MutableList<PlantDailyLog> = mutableListOf(),
+    val savedReports: MutableList<SavedReport> = mutableListOf()
 )
 
 // NEW DOCUMENT MODELS
@@ -253,5 +254,31 @@ data class PlantDailyLog(
     val fuelIssued: String = "",
     val operatorName: String = "",
     val remarks: String = "",
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+data class SavedReport(
+    val id: String = "",
+    val date: String = "",
+    val reportNo: String = "",
+    val projectName: String = "",
+    val contractorName: String = "",
+    val contractNo: String = "",
+    val cowName: String = "",
+    val contractorRep: String = "",
+    val dayNo: String = "",
+    val weekNo: String = "",
+    val weather: String = "",
+    val temp: String = "",
+    val remarks: String = "",
+    val hns: String = "",
+    val diaryCount: Int = 0,
+    val inspectionCount: Int = 0,
+    val ncrCount: Int = 0,
+    val siCount: Int = 0,
+    val labourTotal: Int = 0,
+    val plantCount: Int = 0,
+    val materialDeliveries: Int = 0,
+    val delayCount: Int = 0,
     val timestamp: Long = System.currentTimeMillis()
 )
