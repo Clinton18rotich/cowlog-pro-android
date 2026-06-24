@@ -53,11 +53,13 @@ fun ReportScreen(appData: AppData, settings: ProjectSettings, navController: Nav
     val dt = appData.diary.filter { dateFormat.format(Date(it.timestamp)) == selectedDate }
     val itInsp = appData.inspections.filter { dateFormat.format(Date(it.timestamp)) == selectedDate }
     val si = appData.instructions.filter { dateFormat.format(Date(it.timestamp)) == selectedDate }
-    val no = appData.ncrs.filter { it.status == "open" }
+    val no = appData.ncrs.filter { it.status == "open" && dateFormat.format(Date(it.timestamp)) == selectedDate }
     val delays = appData.delays.filter { it.date == selectedDate }
     val todayDel = appData.materialLogs.filter { it.date == selectedDate }
     val at = appData.attendance.filter { it.date == selectedDate }
     val activePlant = appData.plantEquipment.filter { it.status == "working" || it.status == "idle" }
+    val todayPlantLogs = appData.plantDailyLogs.filter { it.date == selectedDate }
+    val activePlantToday = activePlant.filter { p -> todayPlantLogs.any { it.plantId == p.id } }
     val lowMat = appData.materials.filter { it.currentStock < it.minStock }
     val totalWorkers = at.sumOf { (it.count.toIntOrNull() ?: 0) }
 
@@ -109,7 +111,7 @@ fun ReportScreen(appData: AppData, settings: ProjectSettings, navController: Nav
                 Button(onClick = { try { val file = generateReportPDF(context, appData, settings, edCow, edRemarks, edHnS, edWeather, edTemp, edContractorRep); val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file); val i = Intent(Intent.ACTION_SEND).apply { type = "application/pdf"; putExtra(Intent.EXTRA_STREAM, uri); putExtra(Intent.EXTRA_TEXT, "CoW Daily Report - $rdate - $edProject"); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }; context.startActivity(Intent.createChooser(i, "Share PDF")) } catch (e: Exception) { Toast.makeText(context, "Sharing failed", Toast.LENGTH_SHORT).show() } }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))) { Text("\uD83D\uDCF1", fontSize = 9.sp) }
                 Button(onClick = { try { val file = generateReportPDF(context, appData, settings, edCow, edRemarks, edHnS, edWeather, edTemp, edContractorRep); val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file); val i = Intent(Intent.ACTION_SEND).apply { type = "application/pdf"; putExtra(Intent.EXTRA_STREAM, uri); putExtra(Intent.EXTRA_SUBJECT, "CoW Daily Report — $rdate — $edProject"); putExtra(Intent.EXTRA_TEXT, "Please find attached the Clerk of Works Daily Site Report."); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }; context.startActivity(Intent.createChooser(i, "Share Report")) } catch (e: Exception) { Toast.makeText(context, "No email app", Toast.LENGTH_SHORT).show() } }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E))) { Text("\uD83D\uDCE7", fontSize = 9.sp) }
                 Button(onClick = { val file = generateReportPDF(context, appData, settings, edCow, edRemarks, edHnS, edWeather, edTemp, edContractorRep); printPDF(context, file) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF636366))) { Text("\uD83D\uDDA8\uFE0F", fontSize = 9.sp) }
-                Button(onClick = { val sr = SavedReport(id = "RPT-${UUID.randomUUID().toString().take(8)}", date = selectedDate, reportNo = rn, projectName = edProject, contractorName = edContractor, contractNo = edContractNo, cowName = edCow, contractorRep = edContractorRep, dayNo = edDayNo, weekNo = edWeekNo, weather = edWeather, temp = edTemp, remarks = edRemarks, hns = edHnS, diaryCount = dt.size, inspectionCount = itInsp.size, ncrCount = no.size, siCount = si.size, labourTotal = totalWorkers, plantCount = activePlant.size, materialDeliveries = todayDel.size, delayCount = delays.size); appData.savedReports.add(sr); onUpdate(appData); Toast.makeText(context, "\u2705 Report saved for $selectedDate", Toast.LENGTH_SHORT).show() }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9500))) { Text("\uD83D\uDCBE", fontSize = 9.sp) }
+                Button(onClick = { val sr = SavedReport(id = "RPT-${UUID.randomUUID().toString().take(8)}", date = selectedDate, reportNo = rn, projectName = edProject, contractorName = edContractor, contractNo = edContractNo, cowName = edCow, contractorRep = edContractorRep, dayNo = edDayNo, weekNo = edWeekNo, weather = edWeather, temp = edTemp, remarks = edRemarks, hns = edHnS, diaryCount = dt.size, inspectionCount = itInsp.size, ncrCount = no.size, siCount = si.size, labourTotal = totalWorkers, plantCount = activePlantToday.ifEmpty { activePlant }.size, materialDeliveries = todayDel.size, delayCount = delays.size); appData.savedReports.add(sr); onUpdate(appData); Toast.makeText(context, "\u2705 Report saved for $selectedDate", Toast.LENGTH_SHORT).show() }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9500))) { Text("\uD83D\uDCBE", fontSize = 9.sp) }
                 Button(onClick = { onUpdate(appData) }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E))) { Text("\uD83D\uDD04", fontSize = 9.sp) }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -139,7 +141,7 @@ fun ReportScreen(appData: AppData, settings: ProjectSettings, navController: Nav
             // 10 SECTIONS
             ReportSectionHeader("1.0 WORK IN PROGRESS"); WorkProgressTable(dt, workRows); Spacer(modifier = Modifier.height(8.dp))
             ReportSectionHeader("2.0 LABOUR ON SITE"); LabourTable(at, totalWorkers); Spacer(modifier = Modifier.height(8.dp))
-            ReportSectionHeader("3.0 PLANT & EQUIPMENT ON SITE"); PlantTable(activePlant, plantRows); Spacer(modifier = Modifier.height(8.dp))
+            ReportSectionHeader("3.0 PLANT & EQUIPMENT ON SITE"); PlantTable(activePlantToday.ifEmpty { activePlant }, plantRows); Spacer(modifier = Modifier.height(8.dp))
             ReportSectionHeader("4.0 MATERIALS DELIVERED"); MaterialsTable(todayDel, appData, matRows); Spacer(modifier = Modifier.height(8.dp))
             ReportSectionHeader("5.0 INSPECTIONS & TESTS"); InspectionsTable(itInsp, sdf, inspRows); Spacer(modifier = Modifier.height(8.dp))
             ReportSectionHeader("6.0 NON-CONFORMANCE REPORTS (NCRs)"); NCRTable(no, ncrRows); Spacer(modifier = Modifier.height(8.dp))
@@ -201,6 +203,8 @@ fun generateReportPDF(context: Context, appData: AppData, settings: ProjectSetti
     val delays = appData.delays.filter { it.date == today }
     val todayDel = appData.materialLogs.filter { it.date == today }
     val activePlant = appData.plantEquipment.filter { it.status == "working" || it.status == "idle" }
+    val todayPlantLogs = appData.plantDailyLogs.filter { it.date == today }
+    val activePlantToday = activePlant.filter { p -> todayPlantLogs.any { it.plantId == p.id } }
     val rn = "COW/${settings.reportCounter}/${Calendar.getInstance().get(Calendar.YEAR)}"
     val rdate = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(Date())
     val totalWorkers = at.sumOf { (it.count.toIntOrNull() ?: 0) }
@@ -232,8 +236,8 @@ fun generateReportPDF(context: Context, appData: AppData, settings: ProjectSetti
     at.forEach { e -> val c = e.category.ifEmpty { "Unskilled" }; catCounts[c] = (catCounts[c] ?: 0) + (e.count.toIntOrNull() ?: 0) }
     cats.forEach { cat -> line("  $cat: ${catCounts[cat] ?: 0}", 9f) }; y += 4f
 
-    section("3. PLANT & EQUIPMENT (${activePlant.size} active)")
-    activePlant.take(6).forEach { p -> line("  • ${p.name} — ${p.status}", 9f) }; y += 4f
+    section("3. PLANT & EQUIPMENT (${activePlantToday.ifEmpty { activePlant }.size} active)")
+    activePlantToday.ifEmpty { activePlant }.take(6).forEach { p -> line("  • ${p.name} — ${p.status}", 9f) }; y += 4f
 
     section("4. MATERIALS (${todayDel.size} deliveries)")
     todayDel.take(5).forEach { log -> val mat = appData.materials.find { it.id == log.materialId }; line("  • ${mat?.name ?: "Material"}: ${log.quantity} ${log.unit}", 9f) }; y += 4f
