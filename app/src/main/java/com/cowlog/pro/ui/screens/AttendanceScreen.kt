@@ -13,8 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cowlog.pro.data.*
-import com.cowlog.pro.ui.BottomNavBar
-import com.cowlog.pro.ui.TopBar
 import com.cowlog.pro.ui.components.DateFilterBar
 import java.text.SimpleDateFormat
 import java.util.*

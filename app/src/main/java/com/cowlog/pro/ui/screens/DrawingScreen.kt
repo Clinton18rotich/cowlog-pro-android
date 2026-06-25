@@ -30,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cowlog.pro.data.*
-import com.cowlog.pro.ui.BottomNavBar
-import com.cowlog.pro.ui.TopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

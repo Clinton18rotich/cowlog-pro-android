@@ -31,8 +31,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.cowlog.pro.data.*
-import com.cowlog.pro.ui.BottomNavBar
-import com.cowlog.pro.ui.TopBar
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -90,7 +88,7 @@ fun ReportScreen(appData: AppData, settings: ProjectSettings, navController: Nav
             dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } }) { DatePicker(state = dps) }
     }
 
-    Scaffold( bottomBar = { BottomNavBar(navController, "report") }) { padding ->
+    Scaffold { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(8.dp)) {
 
             // DATE SELECTOR

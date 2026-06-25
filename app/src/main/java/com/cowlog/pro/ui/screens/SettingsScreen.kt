@@ -12,8 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cowlog.pro.data.*
-import com.cowlog.pro.ui.BottomNavBar
-import com.cowlog.pro.ui.TopBar
 
 @Composable
 fun SettingsScreen(
@@ -30,7 +28,7 @@ fun SettingsScreen(
     
     Scaffold(
         
-        bottomBar = { BottomNavBar(navController, "settings") }
+        
     ) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
