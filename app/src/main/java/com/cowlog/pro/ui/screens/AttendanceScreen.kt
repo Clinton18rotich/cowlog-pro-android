@@ -91,7 +91,7 @@ fun AttendanceScreen(
                     OutlinedTextField(value = count, onValueChange = { count = it }, label = { Text("Count") }, modifier = Modifier.fillMaxWidth())
                 }
             },
-            confirmButton = { TextButton(onClick = { val n = appData.copy(); n.attendance.add(Attendance(id = UUID.randomUUID().toString(), date = filterDate.ifEmpty { today }.take(10), category = category, name = name, count = count)); onUpdate(n); showForm = false }) { Text("Save") } },
+            confirmButton = { TextButton(onClick = { val n = appData.copy(); n.attendance.add(Attendance(id = UUID.randomUUID().toString(), date = today, category = category, name = name, count = count)); onUpdate(n); showForm = false }) { Text("Save") } },
             dismissButton = { TextButton(onClick = { showForm = false }) { Text("Cancel") } }
         )
     }

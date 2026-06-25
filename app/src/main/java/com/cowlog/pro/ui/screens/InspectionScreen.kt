@@ -253,6 +253,7 @@ fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController:
                         val newData = appData.copy()
                         newData.inspections.add(Inspection(
                             id = UUID.randomUUID().toString(),
+                            checklistType = selectedChecklist,
                             location = loc,
                             items = inspectionItems,
                             result = result,

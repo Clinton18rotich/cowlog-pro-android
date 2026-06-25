@@ -60,6 +60,24 @@ val WORK_ITEMS = listOf(
 )
 
 // Common site observations
+val SITE_LOCATIONS = listOf(
+    "📍 Site Wide / General",
+    "📍 Block A - Ground Floor", "📍 Block A - First Floor", "📍 Block A - Second Floor",
+    "📍 Block B - Ground Floor", "📍 Block B - First Floor", "📍 Block B - Second Floor",
+    "📍 Block C - Ground Floor", "📍 Block C - First Floor",
+    "📍 Main Entrance / Gate", "📍 Perimeter Wall / Fence",
+    "📍 Parking Area", "📍 Driveway / Access Road",
+    "📍 Excavation Area", "📍 Foundation / Substructure",
+    "📍 Superstructure - Columns", "📍 Superstructure - Beams", "📍 Superstructure - Slabs",
+    "📍 Staircase", "📍 Lift Shaft",
+    "📍 Roof Level", "📍 Mechanical Floor / Plant Room",
+    "📍 External Works - Paving", "📍 External Works - Drainage",
+    "📍 External Works - Landscaping",
+    "📍 Site Office", "📍 Material Storage Area", "📍 Workshop / Yard",
+    "📍 Guard House", "📍 Water Tank / Tower",
+    "📍 Septic Tank Area", "📍 Soak Pit Area",
+)
+
 val OBSERVATIONS = listOf(
     "✅ Work progressing well, within programme",
     "✅ Good quality workmanship observed",
@@ -152,6 +170,7 @@ fun DiaryScreen(appData: AppData, settings: ProjectSettings, navController: NavC
         var selectedObs by remember { mutableStateOf("") }
         var title by remember { mutableStateOf("") }
         var location by remember { mutableStateOf(settings.defaultLocation) }
+        var showLocPicker by remember { mutableStateOf(false) }
         var description by remember { mutableStateOf("") }
         var percentComplete by remember { mutableStateOf("") }
         var showWorkPicker by remember { mutableStateOf(false) }
@@ -176,7 +195,18 @@ fun DiaryScreen(appData: AppData, settings: ProjectSettings, navController: NavC
                         }
                     }
                     OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = location, onValueChange = { location = it }, label = { Text("Location") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    TextButton(onClick = { showLocPicker = !showLocPicker }) {
+                        Text(if (location.isEmpty()) "📍 Select Location ▼" else "📍 $location", fontSize = 12.sp, color = Color(0xFFFF9F0A))
+                    }
+                    if (showLocPicker) {
+                        Column(modifier = Modifier.fillMaxWidth().heightIn(max = 150.dp).verticalScroll(rememberScrollState())) {
+                            SITE_LOCATIONS.forEach { loc ->
+                                TextButton(onClick = { location = loc; showLocPicker = false }, modifier = Modifier.fillMaxWidth()) {
+                                    Text(loc, fontSize = 10.sp, color = if (location == loc) Color(0xFFFF9F0A) else Color.White)
+                                }
+                            }
+                        }
+                    }
 
                     // Observations picker
                     TextButton(onClick = { showObsPicker = !showObsPicker }) {
@@ -211,6 +241,7 @@ fun DiaryScreen(appData: AppData, settings: ProjectSettings, navController: NavC
                             location = location,
                             description = description,
                             percentComplete = percentComplete,
+                            issuesIdentified = selectedObs,
                             timestamp = System.currentTimeMillis()
                         )
                         val newData = appData.copy(); newData.diary.add(newEntry); onUpdate(newData); showForm = false

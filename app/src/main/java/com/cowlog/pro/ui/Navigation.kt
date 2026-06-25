@@ -1,4 +1,11 @@
 package com.cowlog.pro.ui
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.cowlog.pro.data.AppData
+import com.cowlog.pro.data.ProjectSettings
+import com.cowlog.pro.ui.screens.*
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,6 +16,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+
+@Composable
+fun Navigation(appData: AppData, settings: ProjectSettings, onUpdate: (AppData) -> Unit) {
+    val navController = rememberNavController()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "diary"
+    Scaffold(
+        topBar = { TopBar(getTitle(currentRoute), navController) },
+        bottomBar = { BottomNavBar(navController, currentRoute) }
+    ) { padding ->
+        NavHost(navController = navController, startDestination = "diary", modifier = Modifier.padding(padding)) {
+            composable("diary") { DiaryScreen(appData, settings, navController, onUpdate) }
+            composable("inspections") { InspectionScreen(appData, settings, navController, onUpdate) }
+            composable("ncr") { NCRScreen(appData, settings, navController, onUpdate) }
+            composable("si") { SIScreen(appData, settings, navController, onUpdate) }
+            composable("report") { ReportScreen(appData, settings, navController, onUpdate) }
+            composable("plant") { PlantScreen(appData, settings, navController, onUpdate) }
+            composable("materials") { MaterialScreen(appData, settings, navController, onUpdate) }
+            composable("concrete") { ConcreteScreen(appData, settings, navController, onUpdate) }
+            composable("attendance") { AttendanceScreen(appData, settings, navController, onUpdate) }
+            composable("rfi") { RFIScreen(appData, settings, navController, onUpdate) }
+            composable("drawings") { DrawingScreen(appData, settings, navController, onUpdate) }
+            composable("stopwork") { StopWorkScreen(appData, settings, navController, onUpdate) }
+            composable("delays") { DelayScreen(appData, settings, navController, onUpdate) }
+            composable("delaynotices") { DelayNoticeScreen(appData, settings, navController, onUpdate) }
+            composable("rejections") { MaterialRejectionScreen(appData, settings, navController, onUpdate) }
+            composable("meetings") { MeetingScreen(appData, settings, navController, onUpdate) }
+            composable("settings") { SettingsScreen(settings, navController, {}) }
+        }
+    }
+}
+
+fun getTitle(route: String): String = when(route) {
+    "diary" -> "📔 Site Diary"; "inspections" -> "✅ Inspections"; "ncr" -> "🚨 NCRs"
+    "si" -> "📝 Site Instructions"; "report" -> "📄 Daily Report"; "plant" -> "🚜 Plant"
+    "materials" -> "🧱 Materials"; "concrete" -> "🧪 Concrete"; "attendance" -> "👷 Labour"
+    "rfi" -> "📤 RFIs"; "drawings" -> "📐 Drawings"; "stopwork" -> "🛑 Stop Work"
+    "delays" -> "⏰ Delays"; "delaynotices" -> "🚧 Notices"; "rejections" -> "📦 Rejections"
+    "meetings" -> "📝 Meetings"; "settings" -> "⚙️ Settings"; else -> "CoW Log Pro"
+}
 
 @Composable
 fun BottomNavBar(navController: NavController, currentRoute: String) {
