@@ -148,6 +148,7 @@ fun RFIScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
                                 Text(rfi.question.take(80), fontSize = 11.sp, color = Color.White)
                                 Text("To: ${rfi.sentTo} · ${SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(rfi.timestamp))}", fontSize = 10.sp, color = Color.Gray)
                                 Text("📄 Tap to view document →", fontSize = 9.sp, color = Color(0xFF0A84FF))
+                            TextButton(onClick = { val newData = appData.copy(); newData.rfis.removeAll { it.id == rfi.id }; onUpdate(newData) }) { Text("🗑️ Delete", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                             }
                         }
                     }

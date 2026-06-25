@@ -189,6 +189,7 @@ fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController:
                                 }
                                 Text("${insp.items.count { it.passed }}/${insp.items.size} passed | ${insp.location}", fontSize = 10.sp, color = Color.Gray)
                                 Text("${SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault()).format(Date(insp.timestamp))}", fontSize = 9.sp, color = Color.DarkGray)
+                            TextButton(onClick = { val newData = appData.copy(); newData.inspections.removeAll { it.id == insp.id }; onUpdate(newData) }) { Text("🗑️ Delete", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                             }
                         }
                     }

@@ -77,6 +77,7 @@ fun NCRScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
                                 Text(ncr.title, fontSize = 12.sp)
                                 Text("${ncr.location} · ${ncr.severity} · ${SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(ncr.timestamp))}", fontSize = 10.sp, color = Color.Gray)
                                 Text("📄 Tap to view document →", fontSize = 9.sp, color = Color(0xFF0A84FF))
+                            TextButton(onClick = { val newData = appData.copy(); newData.ncrs.removeAll { it.id == ncr.id }; onUpdate(newData) }) { Text("🗑️ Delete", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                             }
                         }
                     }

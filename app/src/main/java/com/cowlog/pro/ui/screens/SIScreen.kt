@@ -204,6 +204,7 @@ fun SIScreen(appData: AppData, settings: ProjectSettings, navController: NavCont
                                 Text(si.description.take(80), fontSize = 11.sp, color = Color.White)
                                 Text("To: ${si.issuedTo} · ${SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date(si.timestamp))}", fontSize = 10.sp, color = Color.Gray)
                                 Text("📄 Tap to view document →", fontSize = 9.sp, color = Color(0xFF0A84FF))
+                            TextButton(onClick = { val newData = appData.copy(); newData.instructions.removeAll { it.id == si.id }; onUpdate(newData) }) { Text("🗑️ Delete", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                             }
                         }
                     }

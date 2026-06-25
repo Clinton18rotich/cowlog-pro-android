@@ -90,6 +90,7 @@ fun PlantScreen(appData: AppData, settings: ProjectSettings, navController: NavC
                                 }
                                 Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Button(onClick = { showLog = plant.id }, modifier = Modifier.height(28.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0A84FF))) { Text("Log Hours", fontSize = 9.sp) }
+                            TextButton(onClick = { val newData = appData.copy(); newData.plantEquipment.removeAll { it.id == plant.id }; onUpdate(newData) }) { Text("🗑️", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                                     Button(onClick = { val n = appData.copy(); val i = n.plantEquipment.indexOfFirst { it.id == plant.id }; if (i >= 0) { val ns = when (plant.status) { "Working" -> "Idle"; "Idle" -> "Under Repair"; "Under Repair" -> "Working"; else -> "Working" }; n.plantEquipment[i] = n.plantEquipment[i].copy(status = ns); onUpdate(n) } }, modifier = Modifier.height(28.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2C2C2E))) { Text("Status", fontSize = 9.sp) }
                                 }
                             }

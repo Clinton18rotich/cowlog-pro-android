@@ -63,6 +63,7 @@ fun AttendanceScreen(
                                     Text(cat, fontWeight = FontWeight.Bold, fontSize = 13.sp); Text("$catTotal", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0A84FF))
                                 }
                                 items.forEach { Text("${it.name}: ${it.count}", fontSize = 11.sp, color = Color.Gray) }
+                            TextButton(onClick = { val newData = appData.copy(); newData.attendance.removeAll { a -> items.any { it.id == a.id } }; onUpdate(newData) }) { Text("🗑️ Delete All", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                             }
                         }
                     }

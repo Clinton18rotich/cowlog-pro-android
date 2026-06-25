@@ -81,6 +81,7 @@ fun MaterialScreen(appData: AppData, settings: ProjectSettings, navController: N
                             Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                 Column(modifier = Modifier.weight(1f)) { Text(m.name, fontWeight = FontWeight.Bold, fontSize = 13.sp); Text(m.unit, fontSize = 9.sp, color = Color.Gray) }
                                 Text("${m.currentStock}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = sc)
+                            TextButton(onClick = { val newData = appData.copy(); newData.materials.removeAll { it.id == m.id }; onUpdate(newData) }) { Text("🗑️", fontSize = 9.sp, color = Color(0xFFFF453A)) }
                             }
                         }
                     }
