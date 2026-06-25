@@ -53,8 +53,8 @@ fun NCRScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
     var selectedNCR by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { TopBar("🚨 NCRs", navController) },
-        bottomBar = { BottomNavBar(navController, "ncr") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedNCR = "" }, containerColor = Color(0xFFFF453A)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

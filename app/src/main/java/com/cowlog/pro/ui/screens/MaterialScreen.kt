@@ -52,8 +52,8 @@ fun MaterialScreen(appData: AppData, settings: ProjectSettings, navController: N
     var showLogDialog by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { TopBar("🧱 Materials", navController) },
-        bottomBar = { BottomNavBar(navController, "materials") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { mode = "add" }, containerColor = Color(0xFFFF9F0A)) { Text("+", color = Color.Black) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

@@ -29,7 +29,7 @@ fun SettingsScreen(
     var geminiKey by remember { mutableStateOf(settings.geminiKey) }
     
     Scaffold(
-        topBar = { TopBar("⚙️ Settings", navController) },
+        
         bottomBar = { BottomNavBar(navController, "settings") }
     ) { padding ->
         Column(

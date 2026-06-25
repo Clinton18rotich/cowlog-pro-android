@@ -35,8 +35,8 @@ fun DelayScreen(
     var showForm by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopBar("⏰ Delays", navController) },
-        bottomBar = { BottomNavBar(navController, "delays") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true }, containerColor = Color(0xFFFF9F0A)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

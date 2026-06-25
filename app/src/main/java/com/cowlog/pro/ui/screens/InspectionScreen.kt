@@ -166,8 +166,8 @@ fun InspectionScreen(appData: AppData, settings: ProjectSettings, navController:
     var selectedChecklist by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { TopBar("✅ Inspections", navController) },
-        bottomBar = { BottomNavBar(navController, "inspections") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showMenu = true; selectedPhase = ""; selectedChecklist = "" }, containerColor = Color(0xFF30D158)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

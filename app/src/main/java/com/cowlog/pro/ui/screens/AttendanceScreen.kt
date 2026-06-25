@@ -34,8 +34,8 @@ fun AttendanceScreen(
     var showForm by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopBar("👷 Attendance", navController) },
-        bottomBar = { BottomNavBar(navController, "attendance") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true }, containerColor = Color(0xFF0A84FF)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 16.dp)) {

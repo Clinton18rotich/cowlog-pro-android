@@ -90,7 +90,7 @@ fun ReportScreen(appData: AppData, settings: ProjectSettings, navController: Nav
             dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } }) { DatePicker(state = dps) }
     }
 
-    Scaffold(topBar = { TopBar("\uD83D\uDCC4 Daily Report", navController) }, bottomBar = { BottomNavBar(navController, "report") }) { padding ->
+    Scaffold( bottomBar = { BottomNavBar(navController, "report") }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(8.dp)) {
 
             // DATE SELECTOR

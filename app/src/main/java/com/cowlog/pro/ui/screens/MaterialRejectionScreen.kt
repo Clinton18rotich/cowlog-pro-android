@@ -42,8 +42,8 @@ fun MaterialRejectionScreen(appData: AppData, settings: ProjectSettings, navCont
     val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     
     Scaffold(
-        topBar = { TopBar("📦 Rejected Materials", navController) },
-        bottomBar = { BottomNavBar(navController, "rejections") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCat = ""; selectedItem = "" }, containerColor = Color(0xFFFF453A)) { Text("+", color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

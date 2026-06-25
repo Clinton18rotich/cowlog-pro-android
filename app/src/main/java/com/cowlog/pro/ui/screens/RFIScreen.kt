@@ -124,8 +124,8 @@ fun RFIScreen(appData: AppData, settings: ProjectSettings, navController: NavCon
     var selectedQuestion by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { TopBar("❓ RFIs", navController) },
-        bottomBar = { BottomNavBar(navController, "rfi") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedQuestion = "" }, containerColor = Color(0xFF0A84FF)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

@@ -70,8 +70,8 @@ fun ConcreteScreen(appData: AppData, settings: ProjectSettings, navController: N
     }
     
     Scaffold(
-        topBar = { TopBar("🧪 Concrete Cubes", navController) },
-        bottomBar = { BottomNavBar(navController, "concrete") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showAdd = true }, containerColor = Color(0xFFBF5AF2)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

@@ -180,8 +180,8 @@ fun SIScreen(appData: AppData, settings: ProjectSettings, navController: NavCont
     var selectedInstruction by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { TopBar("📝 Site Instructions", navController) },
-        bottomBar = { BottomNavBar(navController, "si") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCategory = ""; selectedInstruction = "" }, containerColor = Color(0xFFFF9500)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

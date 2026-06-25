@@ -51,8 +51,8 @@ fun PlantScreen(appData: AppData, settings: ProjectSettings, navController: NavC
     var showLog by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        topBar = { TopBar("🚜 Plant & Equipment", navController) },
-        bottomBar = { BottomNavBar(navController, "plant") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showAdd = true }, containerColor = Color(0xFF0A84FF)) { Text("+", fontSize = 24.sp, color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

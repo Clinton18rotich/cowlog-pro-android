@@ -39,8 +39,8 @@ fun DelayNoticeScreen(appData: AppData, settings: ProjectSettings, navController
     val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     
     Scaffold(
-        topBar = { TopBar("🚧 Delay Notices", navController) },
-        bottomBar = { BottomNavBar(navController, "delaynotices") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCat = ""; selectedItem = "" }, containerColor = Color(0xFFFF9F0A)) { Text("+") } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

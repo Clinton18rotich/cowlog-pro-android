@@ -117,8 +117,8 @@ fun DiaryScreen(appData: AppData, settings: ProjectSettings, navController: NavC
     } else appData.diary
 
     Scaffold(
-        topBar = { TopBar("📔 Site Diary", navController) },
-        bottomBar = { BottomNavBar(navController, "diary") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true }, containerColor = Color(0xFF0A84FF)) { Text("+", color = Color.White, fontSize = 24.sp) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

@@ -67,8 +67,8 @@ fun StopWorkScreen(appData: AppData, settings: ProjectSettings, navController: N
     val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     
     Scaffold(
-        topBar = { TopBar("🛑 Stop Work Orders", navController) },
-        bottomBar = { BottomNavBar(navController, "stopwork") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true; selectedCat = ""; selectedItem = "" }, containerColor = Color(0xFFFF453A)) { Text("+", color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

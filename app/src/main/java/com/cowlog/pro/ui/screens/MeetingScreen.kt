@@ -42,8 +42,8 @@ fun MeetingScreen(appData: AppData, settings: ProjectSettings, navController: Na
     val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     
     Scaffold(
-        topBar = { TopBar("📝 Meeting Minutes", navController) },
-        bottomBar = { BottomNavBar(navController, "meetings") },
+        
+        
         floatingActionButton = { FloatingActionButton(onClick = { showForm = true }, containerColor = Color(0xFF0A84FF)) { Text("+", color = Color.White) } }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 12.dp)) {

@@ -120,8 +120,8 @@ fun DrawingScreen(
     // ── MAIN LIST ──
     if (viewingDrawing == null) {
         Scaffold(
-            topBar = { TopBar("📐 Drawings & Plans", navController) },
-            bottomBar = { BottomNavBar(navController, "drawings") },
+            
+            
             floatingActionButton = { FloatingActionButton(onClick = { showAdd = true }, containerColor = Color(0xFF0A84FF)) { Text("+", color = Color.White) } }
         ) { padding ->
             Column(modifier = Modifier.padding(padding).padding(12.dp)) {
