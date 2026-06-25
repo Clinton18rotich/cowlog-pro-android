@@ -1,4 +1,6 @@
 package com.cowlog.pro.ui.screens
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -108,7 +110,8 @@ fun MaterialScreen(appData: AppData, settings: ProjectSettings, navController: N
         AlertDialog(onDismissRequest = { showAdd = false }, title = { Text("Add Material", fontSize = 15.sp) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("Select from catalog:", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9F0A))
-                MATERIAL_CATALOG.keys.forEach { cat -> TextButton(onClick = { selectedCat = cat }, modifier = Modifier.fillMaxWidth()) { Text(cat, fontSize = 11.sp, color = if (selectedCat == cat) Color(0xFFFF9F0A) else Color.Gray) } }
+                Column(modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp).verticalScroll(rememberScrollState())) { MATERIAL_CATALOG.keys.forEach { cat -> TextButton(onClick = { selectedCat = cat }, modifier = Modifier.fillMaxWidth()) { Text(cat, fontSize = 11.sp, color = if (selectedCat == cat) Color(0xFFFF9F0A) else Color.Gray) } }
+                }
                 if (selectedCat.isNotEmpty()) { MATERIAL_CATALOG[selectedCat]?.forEach { item -> TextButton(onClick = { name = item; unit = when { item.contains("Cement") || item.contains("Lime") -> "Bags"; item.contains("Y") || item.contains("BRC") || item.contains("Steel") -> "Tonnes"; item.contains("Block") || item.contains("Tile") || item.contains("Brick") -> "Pieces"; item.contains("Sand") || item.contains("Ballast") || item.contains("Hardcore") || item.contains("Murram") -> "Tonnes"; item.contains("Timber") || item.contains("Plywood") -> "Pieces"; item.contains("DPM") || item.contains("Membrane") -> "Rolls"; item.contains("Pipe") || item.contains("Conduit") -> "Lengths"; item.contains("Cable") -> "Rolls"; item.contains("Paint") || item.contains("Primer") || item.contains("Sealant") -> "Litres"; item.contains("Nail") || item.contains("Screw") || item.contains("Wire") -> "kg"; item.contains("Water") -> "No."; else -> "No." }; }, modifier = Modifier.fillMaxWidth()) { Text(item, fontSize = 11.sp, color = Color.White) } } }
                 OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Material Name *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 Text("Unit:", fontSize = 12.sp, color = Color.Gray)
