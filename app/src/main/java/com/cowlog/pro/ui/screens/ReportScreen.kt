@@ -35,6 +35,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.runtime.LaunchedEffect
+import com.cowlog.pro.data.WeatherService
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,8 @@ fun ReportScreen(appData: AppData, settings: ProjectSettings, navController: Nav
     var showDatePicker by remember { mutableStateOf(false) }
     val cal = Calendar.getInstance()
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val rn = "COW/${settings.reportCounter}/${Calendar.getInstance().get(Calendar.YEAR)}"
+    val reportsToday = appData.savedReports.filter { it.date == selectedDate }.size + 1
+    val rn = "COW/${reportsToday}/${selectedDate.take(4)}"
     val rdate = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(dateFormat.parse(selectedDate)!!)
 
     val dt = appData.diary.filter { dateFormat.format(Date(it.timestamp)) == selectedDate }
@@ -207,7 +210,8 @@ fun generateReportPDF(context: Context, appData: AppData, settings: ProjectSetti
     val activePlant = appData.plantEquipment.filter { it.status == "working" || it.status == "idle" }
     val todayPlantLogs = appData.plantDailyLogs.filter { it.date == today }
     val activePlantToday = activePlant.filter { p -> todayPlantLogs.any { it.plantId == p.id } }
-    val rn = "COW/${settings.reportCounter}/${Calendar.getInstance().get(Calendar.YEAR)}"
+    val reportsToday = appData.savedReports.filter { it.date == today }.size + 1
+    val rn = "COW/${reportsToday}/${today.take(4)}"
     val rdate = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(Date())
     val totalWorkers = at.sumOf { (it.count.toIntOrNull() ?: 0) }
 
